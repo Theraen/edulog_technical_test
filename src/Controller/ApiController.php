@@ -96,4 +96,20 @@ class ApiController extends AbstractController
         //returns the table in json format
         return $this->json($deadlines);
     }
+
+    #[Route('/donedeadline/{id}', name: 'done_deadline')]
+    public function doneDeadline($id): Response
+    {
+
+        //Use Doctrine to retrieve all unclosed deadlines
+        $deadlineDoctrine = $this->deadlineRepository->find($id);
+
+        $deadlineDoctrine->setIsDone(true);
+        $this->em->flush();
+
+        //returns the table in json format
+        return $this->json([
+            'message' => 'La tâche "' . $deadlineDoctrine->getTitle() . '" à bien été clôturée' 
+        ]);
+    }
 }
