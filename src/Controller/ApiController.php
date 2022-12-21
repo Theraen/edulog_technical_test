@@ -15,8 +15,7 @@ class ApiController extends AbstractController
 {
 
     public function __construct(private EntityManagerInterface $em, private DeadlineRepository $deadlineRepository)
-    {
-        
+    {  
     }
 
     #[Route('/nextdeadlines', name: 'next_deadlines')]
@@ -40,6 +39,40 @@ class ApiController extends AbstractController
 
         //Use Doctrine to retrieve deadlines until Friday of next week that are not yet closed
         $deadlinesDoctrine = $this->deadlineRepository->findByNotDoneAndNextFriday($nextFriday);
+        $deadlines = [];
+
+
+        //Loop to build the next deadlines table
+        foreach($deadlinesDoctrine as $deadline) {
+
+    
+            $interval = $deadline->getDueDate()->diff($today);
+
+            $deadlineTemp = [
+                'title' => $deadline->getTitle(),
+                'nb_day' => $today > $deadline->getDueDate() ? $interval->days . ' jour(s) de retard' : $interval->days . ' jour(s)',
+                'flag' => $today > $deadline->getDueDate() ? 'EN RETARD' : '',
+                'due_date' => $deadline->getDueDate()->format('d/m/Y')
+            ];
+
+            array_push($deadlines, $deadlineTemp);
+        }
+
+
+        //returns the table in json format
+        return $this->json($deadlines);
+    }
+
+    #[Route('/alldeadlines', name: 'all_deadlines')]
+    public function allDeadlines(): Response
+    {
+
+        $today = new DateTime();
+
+        //Use Doctrine to retrieve all unclosed deadlines
+        $deadlinesDoctrine = $this->deadlineRepository->findBy([
+            'is_done' => false
+        ]);
         $deadlines = [];
 
 
