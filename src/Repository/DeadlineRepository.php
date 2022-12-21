@@ -39,6 +39,22 @@ class DeadlineRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @return Deadline[] Returns an array of Deadline objects
+    */
+    public function findByNotDoneAndNextFriday($dueDate): array
+    {
+        return $this->createQueryBuilder('d')
+            ->andWhere('d.is_done = :isDone')
+            ->andWhere('d.due_date <= :dueDate')
+            ->setParameter('isDone', false)
+            ->setParameter('dueDate', $dueDate)
+            ->orderBy('d.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
 //    /**
 //     * @return Deadline[] Returns an array of Deadline objects
 //     */
